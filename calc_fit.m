@@ -37,42 +37,39 @@ deltaN = @(N0) getDeltaN(N0,ad,p);
 % Also get the N1 on each day, N2 on each day, and M
 [deltaN, N1, N2, M] = getDeltaN(N1,ad,p); 
 
-% Verify that we're in the saturated parameter space (true
-% for parameters used in paper)
-if N1(ad) < Vb+Vg
-    error('N < Vb + Vg');
-end
-if M < Vg+Vb
-    error('M < Vb + Vg');
-end
-
-% = Mutant Survival =
-
-% Survival for mutant that arrives one day earlier
-if ad == 1
-    Ps_e = NaN; % Cannot arrive one day earlier
+if N1(ad) < Vb+Vg || M < Vg+Vb
+    % If we're not in the saturated parameter space
+    % with a viable population
+    fit_e = NaN;
+    fit_l = NaN;
 else
-    Ps_e = (M/N1(1)) * max(0, ( 1 - (a*X)/( 1 + (1-a)*b*N2(ad-1) ) ) / (1-P0));
+    % = Mutant Survival =
+
+    % Survival for mutant that arrives one day earlier
+    if ad == 1
+        Ps_e = NaN; % Cannot arrive one day earlier
+    else
+        Ps_e = (M/N1(1)) * max(0, ( 1 - (a*X)/( 1 + (1-a)*b*N2(ad-1) ) ) / (1-P0));
+    end
+
+    % Survival for mutant that arrives one day later
+    if ad == tmax
+        Ps_l = NaN; % Cannot arrive one day later
+    else
+        Ps_l = (M/N1(1)) * max(0, (1-P0) / ( 1 - (a*X)/( 1 + a*b*N1(ad) + (1-a)*b*N2(ad) ) ));
+    end
+
+    % = Mutant Territory Acquisition =
+
+    % Territory acquisition for mutant that arrives one day earlier
+    Pg_e = 1; 
+    Pb_e = 0;
+
+    % Territory acquisition for mutant that arrives one day later
+    Pg_l = Vg/M - Vg/N1(ad+1);
+    Pb_l = Vb/M - Vb/N1(ad+1);
+
+    % Fitness of mutants, one day earlier and one day later
+    fit_e = (1-gamma)*Ps_e*(1 + Pg_e*Rg + Pb_e*Rb);
+    fit_l = (1-gamma)*Ps_l*(1 + Pg_l*Rg + Pb_l*Rb);
 end
-
-% Survival for mutant that arrives one day later
-if ad == tmax
-    Ps_l = NaN; % Cannot arrive one day later
-else
-    Ps_l = (M/N1(1)) * max(0, (1-P0) / ( 1 - (a*X)/( 1 + a*b*N1(ad) + (1-a)*b*N2(ad) ) ));
-end
-
-% = Mutant Territory Acquisition =
-
-% Territory acquisition for mutant that arrives one day earlier
-Pg_e = 1; 
-Pb_e = 0;
-
-% Territory acquisition for mutant that arrives one day later
-Pg_l = Vg/M - Vg/N1(ad+1);
-Pb_l = Vb/M - Vb/N1(ad+1);
-
-% Fitness of mutants, one day earlier and one day later
-fit_e = (1-gamma)*Ps_e*(1 + Pg_e*Rg + Pb_e*Rb);
-fit_l = (1-gamma)*Ps_l*(1 + Pg_l*Rg + Pb_l*Rb);
-
