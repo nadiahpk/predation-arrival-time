@@ -4,7 +4,7 @@ Octave code to find the fitness of migratory birds arriving one day earlier or o
 
 # Reference
 
-Harts, A.M.F., Kristense, N.P, Kokko, H. Paper in preparation.
+Harts, A.M.F., Kristense, N.P, Kokko, H. Predation can select for later and more synchronous arrival times in migrating species. Oikos.
 
 # Quickstart
 
